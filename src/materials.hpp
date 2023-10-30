@@ -59,9 +59,9 @@ public:
 
 		Vec3f diffuseComponent = mDiffuseReflectance / PI_F;
 
-		// Vec3f glossyComponent = 
+		Vec3f glossyComponent = mDiffuseReflectance/PI_F+mPhongReflectance*(mPhongExponent+2)/(2*PI_F)*pow(Dot(incomingDirection,outgoingDirection),mPhongExponent);
 
-		return diffuseComponent /* + glossyComponent */;
+		return diffuseComponent + glossyComponent;
     }
 
     Vec3f mDiffuseReflectance;
