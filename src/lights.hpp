@@ -11,7 +11,6 @@
 class AbstractLight
 {
 public:
-
     /**
      * Randomly chooses a point on the light source
      * Arguments:
@@ -22,7 +21,8 @@ public:
      *  - the illumination intensity corresponding to the sampled direction
      *  - the probability density (PDF) of choosing this point
      */
-    virtual std::tuple<Vec3f, Vec3f, float> SamplePointOnLight(const Vec3f& origin, Rng& rng) const {
+    virtual std::tuple<Vec3f, Vec3f, float> SamplePointOnLight(const Vec3f &origin, Rng &rng) const
+    {
         throw std::logic_error("Not implemented");
     }
 
@@ -33,7 +33,8 @@ public:
      *  - origin = our current position in the scene
      *  - lightPoint = the randomly sampled point on the light source
      */
-    virtual float PDF(const Vec3f& origin, const Vec3f& lightPoint) const {
+    virtual float PDF(const Vec3f &origin, const Vec3f &lightPoint) const
+    {
         throw std::logic_error("Not implemented");
     }
 
@@ -42,7 +43,8 @@ public:
      * Arguments:
      *  - direction = direction towards the light source
      */
-    virtual Vec3f Evaluate(const Vec3f& direction) const {
+    virtual Vec3f Evaluate(const Vec3f &direction) const
+    {
         throw std::logic_error("Not implemented");
     }
 
@@ -53,7 +55,6 @@ public:
 class AreaLight : public AbstractLight
 {
 public:
-
     AreaLight(
         const Vec3f &aP0,
         const Vec3f &aP1,
@@ -64,8 +65,8 @@ public:
         e2 = aP2 - aP0;
 
         Vec3f normal = Cross(e1, e2);
-        float len    = normal.Length();
-        mInvArea     = 2.f / len;
+        float len = normal.Length();
+        mInvArea = 2.f / len;
         mFrame.SetFromZ(normal);
     }
 
@@ -80,25 +81,23 @@ public:
 class PointLight : public AbstractLight
 {
 public:
-
-    PointLight(const Vec3f& aPosition)
+    PointLight(const Vec3f &aPosition)
     {
         mPosition = aPosition;
     }
 
-    virtual std::tuple<Vec3f, Vec3f, float> SamplePointOnLight(const Vec3f& origin, Rng& rng) const override {
+    virtual std::tuple<Vec3f, Vec3f, float> SamplePointOnLight(const Vec3f &origin, Rng &rng) const override
+    {
         Vec3f outgoingDirection = mPosition - origin;
         float distanceSquared = outgoingDirection.LenSqr();
 
-		return {mPosition, mIntensity / distanceSquared, 1.0f};
+        return {mPosition, mIntensity / distanceSquared, 1.0f};
     }
 
 public:
-
     Vec3f mPosition;
     Vec3f mIntensity;
 };
-
 
 //////////////////////////////////////////////////////////////////////////
 class BackgroundLight : public AbstractLight
@@ -111,7 +110,6 @@ public:
     }
 
 public:
-
     Vec3f mBackgroundColor;
     float mRadius; // we model the background light as a huge sphere around the whole scene, with a given radius
 };

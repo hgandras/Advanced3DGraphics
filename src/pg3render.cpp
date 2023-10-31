@@ -28,11 +28,11 @@ float render(
     omp_set_num_threads(aConfig.mNumThreads);
 
     // Create 1 renderer per thread
-    typedef AbstractRenderer* AbstractRendererPtr;
+    typedef AbstractRenderer *AbstractRendererPtr;
     AbstractRendererPtr *renderers;
     renderers = new AbstractRendererPtr[aConfig.mNumThreads];
 
-    for (int i=0; i<aConfig.mNumThreads; i++)
+    for (int i = 0; i < aConfig.mNumThreads; i++)
     {
         renderers[i] = CreateRenderer(aConfig, aConfig.mBaseSeed + i);
 
@@ -47,7 +47,7 @@ float render(
     // Iterations based loop
     int globalCounter = 0;
 #pragma omp parallel for
-    for (iter=0; iter < aConfig.mIterations; iter++)
+    for (iter = 0; iter < aConfig.mIterations; iter++)
     {
         int threadId = omp_get_thread_num();
         renderers[threadId]->RunIteration(iter);
@@ -56,11 +56,11 @@ float render(
 #pragma omp critical
         {
             globalCounter++;
-            const double progress   = (double)globalCounter / aConfig.mIterations;
-            const int barCount      = 20;
+            const double progress = (double)globalCounter / aConfig.mIterations;
+            const int barCount = 20;
 
             printf(
-                "\rProgress:  %6.2f%% [", 
+                "\rProgress:  %6.2f%% [",
                 100.0 * progress);
             for (int bar = 1; bar <= barCount; bar++)
             {
@@ -78,7 +78,7 @@ float render(
     auto endT = std::chrono::high_resolution_clock::now();
 
     if (oUsedIterations)
-        *oUsedIterations = iter+1;
+        *oUsedIterations = iter + 1;
 
     // Accumulate from all renderers into a common framebuffer
     int usedRenderers = 0;
@@ -86,7 +86,7 @@ float render(
     // With very low number of iterations and high number of threads
     // not all created renderers had to have been used.
     // Those must not participate in accumulation.
-    for (int i=0; i<aConfig.mNumThreads; i++)
+    for (int i = 0; i < aConfig.mNumThreads; i++)
     {
         if (!renderers[i]->WasUsed())
             continue;
@@ -109,10 +109,10 @@ float render(
     aConfig.mFramebuffer->Scale(1.f / usedRenderers);
 
     // Clean up renderers
-    for (int i=0; i<aConfig.mNumThreads; i++)
+    for (int i = 0; i < aConfig.mNumThreads; i++)
         delete renderers[i];
 
-    delete [] renderers;
+    delete[] renderers;
 
     return float(std::chrono::duration_cast<std::chrono::milliseconds>(endT - startT).count()) / 1000.f; // in seconds
 }
@@ -131,7 +131,7 @@ int main(int argc, const char *argv[])
 
     // If number of threads is invalid, set 1 thread per processor
     if (config.mNumThreads <= 0)
-        config.mNumThreads  = std::max(1, omp_get_num_procs());
+        config.mNumThreads = std::max(1, omp_get_num_procs());
 
     // When some error has been encountered, exit
     if (config.mScene == NULL)
