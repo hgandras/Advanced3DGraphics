@@ -54,7 +54,7 @@ public:
      *  - incomingDirection = a normalized direction towards the previous (origin) point in the scene
      *  - outgoingDirection = a normalized outgoing reflected direction
      */
-    Vec3f EvaluateBRDF(const Vec3f &incomingDirection, const Vec3f &outgoingDirection, const Vec3f &surfaceNormal) const
+    Vec3f EvaluateBRDF(const Vec3f &incomingDirection, const Vec3f &outgoingDirection) const
     {
         if (incomingDirection.z <= 0 && outgoingDirection.z <= 0)
         {
@@ -63,7 +63,7 @@ public:
 
         Vec3f diffuseComponent = mDiffuseReflectance / PI_F;
 
-        Vec3f reflected_direction = 2.0f * Dot(incomingDirection, surfaceNormal) * surfaceNormal - incomingDirection;
+        Vec3f reflected_direction = ReflectLocal(incomingDirection);
         float angle_cos = Dot(outgoingDirection, reflected_direction);
         Vec3f glossyComponent = mPhongReflectance * (mPhongExponent + 2.0f) * pow(angle_cos, mPhongExponent) / (2.0f * PI_F);
 

@@ -61,7 +61,7 @@ public:
                         Ray rayToLight(surfacePoint, outgoingDirection, EPSILON_RAY); // Note! To prevent intersecting the same object we are already on, we need to offset the ray by EPSILON_RAY
                         if (!mScene.FindAnyIntersection(rayToLight, lightDistance))
                         { // Testing if the direction towards the light source is not occluded
-                            LoDirect += intensity * mat.EvaluateBRDF(frame.ToLocal(outgoingDirection), incomingDirection, frame.ToLocal(intersection->normal)) * cosTheta / pdf;
+                            LoDirect += intensity * mat.EvaluateBRDF(frame.ToLocal(outgoingDirection), incomingDirection) * cosTheta / pdf;
                         }
                     }
                 }
