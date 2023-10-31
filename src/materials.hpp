@@ -59,7 +59,8 @@ public:
 
 		Vec3f diffuseComponent = mDiffuseReflectance / PI_F;
 
-		Vec3f glossyComponent = mDiffuseReflectance/PI_F+mPhongReflectance*(mPhongExponent+2)/(2*PI_F)*pow(Dot(incomingDirection,outgoingDirection),mPhongExponent);
+        float angle= std::clamp(Dot(incomingDirection,outgoingDirection),0.0f,PI_F/2);
+		Vec3f glossyComponent = mDiffuseReflectance/PI_F+mPhongReflectance*(mPhongExponent+2)*pow(angle,mPhongExponent)/(2*PI_F);
 
 		return diffuseComponent + glossyComponent;
     }
