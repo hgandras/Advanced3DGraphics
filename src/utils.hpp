@@ -6,18 +6,18 @@
 #include "math.hpp"
 
 #define EPSILON_COSINE 1e-6f
-#define EPSILON_RAY    1e-3f
+#define EPSILON_RAY 1e-3f
 
 // sRGB luminance
-float Luminance(const Vec3f& aRGB)
+float Luminance(const Vec3f &aRGB)
 {
     return 0.212671f * aRGB.x +
-        0.715160f * aRGB.y +
-        0.072169f * aRGB.z;
+           0.715160f * aRGB.y +
+           0.072169f * aRGB.z;
 }
 
 // reflect vector through (0,0,1)
-Vec3f ReflectLocal(const Vec3f& aVector)
+Vec3f ReflectLocal(const Vec3f &aVector)
 {
     return Vec3f(-aVector.x, -aVector.y, aVector.z);
 }
@@ -41,4 +41,16 @@ float PdfAtoW(
     const float aCosThere)
 {
     return aPdfA * Sqr(aDist) / std::abs(aCosThere);
+}
+
+/**
+ * @brief Returns a 2D point sampled uniformly on a righ-angled triangle's surface with side lengths of 1 next
+ * to the right angle.
+ *
+ * @return Vec2f (u,v) sampled surface coordinates
+ */
+Vec2f sampleTriangleUniform(Vec2f samples)
+{
+    float r1 = sqrt(samples.Get(0));
+    return Vec2f(1 - r1, samples.Get(1) * r1);
 }

@@ -70,6 +70,31 @@ public:
         mFrame.SetFromZ(normal);
     }
 
+    virtual std::tuple<Vec3f, Vec3f, float> SamplePointOnLight(const Vec3f &origin, Rng &rng) const override
+    {
+        Vec2f uv = sampleTriangleUniform(rng.GetVec2f());
+        Vec3f u3d = e1 * uv.Get(0);
+        Vec3f v3d = e2 * uv.Get(1);
+        Vec3f sampledPoint = p0 + u3d + v3d;
+
+        Vec3f outgoingDirection = sampledPoint - origin;
+        Vec3f outDirNormal = Normalize(outgoingDirection);
+        float cosTheta = abs(Dot(-outDirNormal, mFrame.Normal()));
+
+        float distanceSquared = outgoingDirection.LenSqr();
+
+        float coefficient = cosTheta / distanceSquared;
+        Vec3f emission_value = mRadiance * coefficient;
+        Vec3f final_value = cosTheta > 0.0f ? emission_value : Vec3f(0.0f);
+
+        return {sampledPoint, emission_value, mInvArea};
+    }
+
+    virtual Vec3f Evaluate(const Vec3f &direction) const override
+    {
+        return mRadiance;
+    }
+
 public:
     Vec3f p0, e1, e2;
     CoordinateFrame mFrame;
@@ -107,6 +132,11 @@ public:
     {
         mBackgroundColor = Vec3f(135, 206, 250) / Vec3f(255.f);
         mRadius = 100.f; // a radius big enough to cover the whole scene
+    }
+
+    virtual std::tuple<Vec3f, Vec3f, float> SamplePointOnLight(const Vec3f &origin, Rng &rng) const override
+    {
+        throw std::logic_error("Not implemented");
     }
 
 public:

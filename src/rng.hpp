@@ -4,9 +4,9 @@
 #include <cmath>
 
 #if defined(_MSC_VER)
-#   if (_MSC_VER < 1600)
-#       define LEGACY_RNG
-#   endif
+#if (_MSC_VER < 1600)
+#define LEGACY_RNG
+#endif
 #endif
 
 #if !defined(LEGACY_RNG)
@@ -15,9 +15,9 @@
 class Rng
 {
 public:
-    Rng(int aSeed = 1234):
-        mRng(aSeed)
-    {}
+    Rng(int aSeed = 1234) : mRng(aSeed)
+    {
+    }
 
     int GetInt()
     {
@@ -52,16 +52,15 @@ public:
     }
 
 private:
-
     std::mt19937_64 mRng;
-    std::uniform_int_distribution<int>    mDistInt;
-    std::uniform_int_distribution<uint>   mDistUint;
+    std::uniform_int_distribution<int> mDistInt;
+    std::uniform_int_distribution<uint> mDistUint;
     std::uniform_real_distribution<float> mDistFloat;
 };
 
 #else
 
-template<unsigned int rounds>
+template <unsigned int rounds>
 class TeaImplTemplate
 {
 public:
@@ -75,37 +74,35 @@ public:
 
     uint GetImpl(void)
     {
-        unsigned int sum=0;
-        const unsigned int delta=0x9e3779b9U;
+        unsigned int sum = 0;
+        const unsigned int delta = 0x9e3779b9U;
 
-        for (unsigned int i=0; i<rounds; i++)
+        for (unsigned int i = 0; i < rounds; i++)
         {
-            sum+=delta;
-            mState0+=((mState1<<4)+0xa341316cU) ^ (mState1+sum) ^ ((mState1>>5)+0xc8013ea4U);
-            mState1+=((mState0<<4)+0xad90777dU) ^ (mState0+sum) ^ ((mState0>>5)+0x7e95761eU);
+            sum += delta;
+            mState0 += ((mState1 << 4) + 0xa341316cU) ^ (mState1 + sum) ^ ((mState1 >> 5) + 0xc8013ea4U);
+            mState1 += ((mState0 << 4) + 0xad90777dU) ^ (mState0 + sum) ^ ((mState0 >> 5) + 0x7e95761eU);
         }
 
         return mState0;
     }
 
 private:
-
     uint mState0, mState1;
 };
 
-typedef TeaImplTemplate<6>  TeaImpl;
+typedef TeaImplTemplate<6> TeaImpl;
 
-template<typename RandomImpl>
+template <typename RandomImpl>
 class RandomBase
 {
 public:
-
     RandomBase(int aSeed = 1234)
     {
         mImpl.Reset(uint(aSeed), 5678);
     }
 
-    uint  GetUint()
+    uint GetUint()
     {
         return getImpl();
     }
@@ -115,7 +112,7 @@ public:
         return (float(GetUint()) + 1.f) * (1.0f / 4294967297.0f);
     }
 
-    Vec2f GetVec2f   (void)
+    Vec2f GetVec2f(void)
     {
         // cannot do return Vec2f(getF32(), getF32()) because the order is not ensured
         float a = GetFloat();
@@ -123,7 +120,7 @@ public:
         return Vec2f(a, b);
     }
 
-    Vec3f GetVec3f   (void)
+    Vec3f GetVec3f(void)
     {
         float a = GetFloat();
         float b = GetFloat();
@@ -148,14 +145,12 @@ public:
     }
 
 protected:
-
     uint getImpl(void)
     {
         return mImpl.GetImpl();
     }
 
 private:
-
     RandomImpl mImpl;
 };
 

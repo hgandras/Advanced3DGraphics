@@ -37,6 +37,13 @@ public:
             auto intersection = mScene.FindClosestIntersection(ray);
             if (intersection)
             {
+                if (intersection->lightID >= 0)
+                {
+                    const AbstractLight *intersectedLightPtr = mScene.GetLightPtr(intersection->lightID);
+                    Vec3f intensity = intersectedLightPtr->Evaluate(-ray.direction);
+                    mFramebuffer.AddColor(sample, intensity);
+                }
+
                 const Vec3f surfacePoint = ray.origin + ray.direction * intersection->distance;
                 CoordinateFrame frame;
                 frame.SetFromZ(intersection->normal);
