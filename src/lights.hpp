@@ -80,7 +80,7 @@ public:
 
         Vec3f outgoingDirection = sampledPoint - origin;
         Vec3f outDirNormal = Normalize(outgoingDirection);
-        float cosTheta = abs(Dot(-outDirNormal, mFrame.Normal()));
+        float cosTheta = Dot(-outDirNormal, mFrame.Normal());
 
         float distanceSquared = outgoingDirection.LenSqr();
 
