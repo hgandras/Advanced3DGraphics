@@ -5,6 +5,7 @@
 #include <utility>
 #include <tuple>
 #include <stdexcept>
+#include <algorithm>
 #include "math.hpp"
 #include "rng.hpp"
 
@@ -136,7 +137,11 @@ public:
 
     virtual std::tuple<Vec3f, Vec3f, float> SamplePointOnLight(const Vec3f &origin, Rng &rng) const override
     {
-        throw std::logic_error("Not implemented");
+        Vec2f samples = rng.GetVec2f();
+        Vec3f unit_sphere_coordinates = sampleUnitSphereUniform(samples);
+        Vec3f sphere_coordinates = mRadius * unit_sphere_coordinates;
+
+        return {sphere_coordinates, mBackgroundColor, 1 / (4.0f * PI_F)};
     }
 
 public:

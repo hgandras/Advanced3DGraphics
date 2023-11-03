@@ -54,3 +54,11 @@ Vec2f sampleTriangleUniform(Vec2f samples)
     float r1 = sqrt(samples.Get(0));
     return Vec2f(1 - r1, samples.Get(1) * r1);
 }
+
+Vec3f sampleUnitSphereUniform(Vec2f samples)
+{
+    float z = 1.0f - 2.0f * samples.Get(0);
+    float r = sqrt(std::max(0.0f, 1.0f - z * z));
+    float phi = 2 * PI_F * samples.Get(1);
+    return Vec3f(r * cos(phi), r * sin(phi), z);
+}
