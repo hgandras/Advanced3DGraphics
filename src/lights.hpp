@@ -88,12 +88,14 @@ public:
         Vec3f emission_value = mRadiance * coefficient;
         Vec3f final_value = cosTheta > 0.0f ? emission_value : Vec3f(0.0f);
 
-        return {sampledPoint, emission_value, mInvArea};
+        return {sampledPoint, final_value, mInvArea};
     }
 
     virtual Vec3f Evaluate(const Vec3f &direction) const override
     {
-        return mRadiance;
+        float cosTheta = Dot(-direction, mFrame.Normal());
+        Vec3f final_value = cosTheta > 0.0f ? mRadiance : Vec3f(0.0f);
+        return final_value;
     }
 
 public:
@@ -120,6 +122,11 @@ public:
         return {mPosition, mIntensity / distanceSquared, 1.0f};
     }
 
+    virtual Vec3f Evaluate(const Vec3f &direction) const override
+    {
+        return mIntensity;
+    }
+
 public:
     Vec3f mPosition;
     Vec3f mIntensity;
@@ -142,6 +149,11 @@ public:
         Vec3f sphere_coordinates = mRadius * unit_sphere_coordinates;
 
         return {sphere_coordinates, mBackgroundColor, 1 / (4.0f * PI_F)};
+    }
+
+    virtual Vec3f Evaluate(const Vec3f &direction) const override
+    {
+        return mBackgroundColor;
     }
 
 public:

@@ -62,3 +62,37 @@ Vec3f sampleUnitSphereUniform(Vec2f samples)
     float phi = 2 * PI_F * samples.Get(1);
     return Vec3f(r * cos(phi), r * sin(phi), z);
 }
+
+Vec3f sampleUnitHemisphere(Vec2f samples)
+{
+    float z = samples.Get(0);
+    float r = sqrt(std::max(0.0f, 1.0f - z * z));
+    float phi = 2 * PI_F * samples.Get(1);
+    return Vec3f(r * cos(phi), r * sin(phi), z);
+}
+
+Vec3f sampleCosUnitHemisphere(Vec2f samples)
+{
+    float r1=samples.Get(0);
+    float r2=samples.Get(1);
+
+    float z =sqrt(r2);
+    float x= cos(2*PI_F*r1)*sqrt(1-r2);
+    float y=sin(2*PI_F*r1)*sqrt(1-r2);
+
+    return Vec3f(x,y,z);
+}
+
+Vec3f sampleSpecular(Vec2f samples,float exponent)
+{
+    float r1=samples.Get(0);
+    float r2=samples.Get(1);
+
+    float sqrtTerm=sqrt(1.0f-pow(r2,2.0f/(exponent+1)));
+
+    float x=cos(2.0f*PI_F*r1)*sqrtTerm;
+    float y=sin(2.0f*PI_F*r1)*sqrtTerm;
+    float z=pow(r2,1.0f/(exponent+1));
+
+    return Vec3f(x,y,z);
+}

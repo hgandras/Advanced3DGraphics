@@ -33,7 +33,33 @@ public:
      */
     std::tuple<Vec3f, Vec3f, float> SampleReflectedDirection(const Vec3f &incomingDirection, Rng &rng) const
     {
-        throw std::logic_error("Not implemented");
+        /*float pDiff=mDiffuseReflectance.Max();
+        float pSpec=mPhongReflectance.Max();
+        float norm=1.0f/(pDiff+pSpec);
+        pDiff*=norm;
+        pSpec*=norm;
+
+        Vec2f sample=rng.GetVec2f();
+        Vec3f outGoingDirection=Vec3f(0.0);
+
+        if(rng.GetFloat()<=pDiff)
+        {
+            outGoingDirection=sampleCosUnitHemisphere(sample);
+        }
+        else
+        {
+            CoordinateFrame frame;
+            frame.SetFromZ(ReflectLocal(incomingDirection)); //Frame is built from the local frame, so world in this case is the shading local surface system.
+            Vec3f sampleLobe=sampleSpecular(sample,mPhongExponent);
+            outGoingDirection=frame.ToWorld(sampleLobe);
+        }
+
+        float pdf=pDiff*diffPDF(outGoingDirection)+pSpec*specPDF(incomingDirection,outGoingDirection);*/
+
+        Vec2f sample=rng.GetVec2f();
+        Vec3f outGoingDirection=sampleUnitHemisphere(sample);
+
+        return {outGoingDirection,EvaluateBRDF(incomingDirection,outGoingDirection),1/(2*PI_F)};
     }
 
     /**
@@ -45,7 +71,19 @@ public:
      */
     float PDF(const Vec3f &incomingDirection, const Vec3f &outgoingDirection) const
     {
-        throw std::logic_error("Not implemented");
+        return outgoingDirection.Get(2)/(PI_F);
+    }
+
+    float specPDF(const Vec3f &incomingDirection,const Vec3f &sampledDirection) const
+    {
+        Vec3f reflected_direction = ReflectLocal(incomingDirection);
+        float angle_cos = Dot(sampledDirection, reflected_direction);
+        return (mPhongExponent+1)/(2*PI_F)*pow(angle_cos,mPhongExponent);
+    }
+
+    float diffPDF(const Vec3f &outgoingDirection) const
+    {
+        return outgoingDirection.Get(2)/(PI_F);
     }
 
     /**
@@ -63,9 +101,9 @@ public:
 
         Vec3f diffuseComponent = mDiffuseReflectance / PI_F;
 
-        Vec3f reflected_direction = ReflectLocal(incomingDirection);
-        float angle_cos = Dot(outgoingDirection, reflected_direction);
-        Vec3f glossyComponent = mPhongReflectance * (mPhongExponent + 2.0f) * pow(angle_cos, mPhongExponent) / (2.0f * PI_F);
+        Vec3f reflected_direction = ReflectLocal(outgoingDirection);
+        float angle_cos = Dot(incomingDirection, reflected_direction);
+        Vec3f glossyComponent = mPhongReflectance * (mPhongExponent + 2.0f) * pow(angle_cos, mPhongExponent)/ (2.0f * PI_F);
 
         return diffuseComponent + glossyComponent;
     }
