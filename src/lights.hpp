@@ -98,6 +98,11 @@ public:
         return final_value;
     }
 
+    virtual float PDF(const Vec3f &origin, const Vec3f &lightPoint) const override
+    {
+        return mInvArea;
+    }
+
 public:
     Vec3f p0, e1, e2;
     CoordinateFrame mFrame;
@@ -127,6 +132,11 @@ public:
         return mIntensity;
     }
 
+    virtual float PDF(const Vec3f &origin, const Vec3f &lightPoint) const override
+    {
+        return 1.0f;
+    }
+
 public:
     Vec3f mPosition;
     Vec3f mIntensity;
@@ -154,6 +164,11 @@ public:
     virtual Vec3f Evaluate(const Vec3f &direction) const override
     {
         return mBackgroundColor;
+    }
+
+    virtual float PDF(const Vec3f &origin, const Vec3f &lightPoint) const override
+    {
+        return 1/(4.0f*PI_F);
     }
 
 public:

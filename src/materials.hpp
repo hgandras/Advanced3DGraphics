@@ -33,7 +33,7 @@ public:
      */
     std::tuple<Vec3f, Vec3f, float> SampleReflectedDirection(const Vec3f &incomingDirection, Rng &rng) const
     {
-        /*float pDiff=mDiffuseReflectance.Max();
+        float pDiff=mDiffuseReflectance.Max();
         float pSpec=mPhongReflectance.Max();
         float norm=1.0f/(pDiff+pSpec);
         pDiff*=norm;
@@ -54,12 +54,7 @@ public:
             outGoingDirection=frame.ToWorld(sampleLobe);
         }
 
-        float pdf=pDiff*diffPDF(outGoingDirection)+pSpec*specPDF(incomingDirection,outGoingDirection);*/
-
-        Vec2f sample=rng.GetVec2f();
-        Vec3f outGoingDirection=sampleUnitHemisphere(sample);
-
-        return {outGoingDirection,EvaluateBRDF(incomingDirection,outGoingDirection),1/(2*PI_F)};
+        return {outGoingDirection,EvaluateBRDF(incomingDirection,outGoingDirection),PDF(incomingDirection,outGoingDirection)};
     }
 
     /**
@@ -71,7 +66,13 @@ public:
      */
     float PDF(const Vec3f &incomingDirection, const Vec3f &outgoingDirection) const
     {
-        return outgoingDirection.Get(2)/(PI_F);
+        float pDiff=mDiffuseReflectance.Max();
+        float pSpec=mPhongReflectance.Max();
+        float norm=1.0f/(pDiff+pSpec);
+        pDiff*=norm;
+        pSpec*=norm;
+
+        return pDiff*diffPDF(outgoingDirection)+pSpec*specPDF(incomingDirection,outgoingDirection);
     }
 
     float specPDF(const Vec3f &incomingDirection,const Vec3f &sampledDirection) const

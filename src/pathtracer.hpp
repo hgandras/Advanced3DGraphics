@@ -55,9 +55,10 @@ public:
 
                 Vec3f LoDirect = Vec3f(0);
                 const Material &mat = mScene.GetMaterial(intersection->materialID);
-#if COS_SAMPLING
+
+                //BRDF SAMPLING
                 //Sampling the material
-                auto [direction,brdfIntensity,pdf] = mat.SampleReflectedDirection(incomingDirection,mRandomGenerator);
+                auto [direction,brdfIntensity,pdfMaterial] = mat.SampleReflectedDirection(incomingDirection,mRandomGenerator);
                 Ray sampleRay=Ray(surfacePoint,frame.ToWorld(direction),EPSILON_RAY);
                 
                 //Checking for light inersection
@@ -67,42 +68,54 @@ public:
                     //Evaluating light source
                     const AbstractLight *light = mScene.GetLightPtr(sampleIntersection->lightID); 
                     assert(light!=0);
+                    float lightPDF=light->PDF(incomingDirection,frame.ToWorld(direction));
+                    float MIRWeightBRDF=pdfMaterial/(lightPDF+pdfMaterial);
                     Vec3f intensity = light->Evaluate(sampleRay.direction);   
                     float cosTheta = Dot(frame.mZ, sampleRay.direction);
-                    LoDirect += intensity * brdfIntensity * cosTheta / pdf;     
+                    LoDirect += MIRWeightBRDF* intensity * brdfIntensity * cosTheta / pdfMaterial;     
                 }
                 else if(!sampleIntersection && mScene.mBackground)
                 {
                     const AbstractLight *light = mScene.mBackground;
                     if(light!=0)
                     {
+                        float lightPDF=light->PDF(incomingDirection,frame.ToWorld(direction));
+                        float MIRWeightBRDF=pdfMaterial/(lightPDF+pdfMaterial);
                         Vec3f intensity = light->Evaluate(sampleRay.direction);   
                         float cosTheta = Dot(frame.mZ, sampleRay.direction);
-                        LoDirect += intensity * brdfIntensity * cosTheta / pdf;
+                        LoDirect += MIRWeightBRDF * intensity * brdfIntensity * cosTheta / pdfMaterial;
                     }
                 }            
-#else
+
+                //LIGHT SOURCE SAMPLE
                 // Connect from the current surface point to every light source in the scene:
                 for (int i = 0; i < mScene.GetLightCount(); i++)
                 {
                     const AbstractLight *light = mScene.GetLightPtr(i);
                     assert(light != 0);
 
-                    auto [lightPoint, intensity, pdf] = light->SamplePointOnLight(surfacePoint, mRandomGenerator);
+                    auto [lightPoint, intensity, pdfLight] = light->SamplePointOnLight(surfacePoint, mRandomGenerator);
                     Vec3f outgoingDirection = Normalize(lightPoint - surfacePoint);
                     float lightDistance = sqrt((lightPoint - surfacePoint).LenSqr());
                     float cosTheta = Dot(frame.mZ, outgoingDirection);
+
+                    float pdfBRDF;
+                    if(pdfLight==1) //In case of the point light this is necessary, since it can be hit with 0 probability.
+                        pdfBRDF=0.0;
+                    else
+                        pdfBRDF=mat.PDF(incomingDirection,frame.ToLocal(outgoingDirection));
+                    float MIRWeightLight=pdfLight/(pdfBRDF+pdfLight);
 
                     if (cosTheta > 0 && intensity.Max() > 0)
                     {
                         Ray rayToLight(surfacePoint, outgoingDirection, EPSILON_RAY); // Note! To prevent intersecting the same object we are already on, we need to offset the ray by EPSILON_RAY
                         if (!mScene.FindAnyIntersection(rayToLight, lightDistance))
                         { // Testing if the direction towards the light source is not occluded
-                            LoDirect += intensity * mat.EvaluateBRDF(incomingDirection,frame.ToLocal(outgoingDirection)) * cosTheta / pdf;
+                            LoDirect += MIRWeightLight* intensity * mat.EvaluateBRDF(incomingDirection,frame.ToLocal(outgoingDirection)) * cosTheta / pdfLight;
                         }
                     }
                 }
-#endif
+
                 mFramebuffer.AddColor(sample, LoDirect);
             }
         }
